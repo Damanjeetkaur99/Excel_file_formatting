@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Data</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>State Data</h1>
+
+    <select id="State">
+        <option value="Bihar">Bihar</option>
+        <option value="Delhi">Delhi</option>
+    </select>
+
+    <select id="ParliamentaryConstituency" disabled>
+        <option value="">Select an option</option>
+    </select>
+
+    <select id="AssemblyConstituency" disabled>
+        <option value="">Select an option</option>
+    </select>
+
+    <select id="Year" disabled>
+        <option value="">Select an option</option>
+    </select>
+
+    <button id="submitBtn" type="submit" disabled>Submit</button>
+
+    <div id="dataContainer"></div>
+
+    <script>
+        $(document).ready(function() {
+            // Define the options for the second dropdown
+            var options2 = {
+                'Delhi': ['East Delhi', 'New Delhi'],
+                'Bihar': ['Araria', 'Banka']
+            };
+
+            // Define the options for the third dropdown
+            var options3 = {
+                'East Delhi': ['Jangpura', 'Okhla'],
+                'Araria': ['Sikti', 'Raniganj']
+            };
+
+            // Define the options for the fourth dropdown
+            var options4 = {
+                'Jangpura': ['2019', '2014', '2009'],
+                'Okhla': ['2019', '2014', '2009'],
+                'Sikti': ['2019', '2014', '2009'],
+                'Raniganj': ['2019', '2014', '2009']
+            };
+
+            // Define the Excel file names based on options
+            var fileNames = {
+                'Bihar_Banka_Sikti_2019': 'Sikta(9).xlsx',
+                'Bihar_Banka_Sikti_2014': 'PC06.xlsx',
+                'Bihar_Banka_Sikti_2009': 'm.xlsx',
+                'Delhi_East Delhi_Jangpura_2019': '41-JANGPURA Assembly Election.xlsx',
+                'Delhi_East Delhi_Jangpura_2014': '41-JANGPURA .xlsx',
+                'Delhi_East Delhi_Jangpura_2009': 'delhi_east_delhi_jangpura_2009.xlsx',
+                // Add more file names for other combinations as needed
+            };
+
+            // Event handler for the first dropdown
+            $('#State').on('change', function() {
+                var selectedOption = $(this).val();
+                var dropdown2 = $('#ParliamentaryConstituency');
+
+                // Clear previous options
+                dropdown2.empty().append('<option value="">Select an option</option>');
+
+                // Add options based on the selected option
+                if (options2.hasOwnProperty(selectedOption)) {
+                    options2[selectedOption].forEach(function(option) {
+                        dropdown2.append('<option value="' + option + '">' + option + '</option>');
+                    });
+                    dropdown2.prop('disabled', false);
+                } else {
+                    dropdown2.prop('disabled', true);
+                }
+
+                // Reset and disable the other dropdowns
+                $('#AssemblyConstituency').empty().append('<option value="">Select an option</option>').prop('disabled', true);
+                $('#Year').empty().append('<option value="">Select an option</option>').prop('disabled', true);
+                $('#submitBtn').prop('disabled', true);
+            });
+
+            // Event handler for the second dropdown
+            $('#ParliamentaryConstituency').on('change', function() {
+                var selectedOption = $(this).val();
+                var dropdown3 = $('#AssemblyConstituency');
+
+                // Clear previous options
+                dropdown3.empty().append('<option value="">Select an option</option>');
+
+                // Add options based on the selected option
+                if (options3.hasOwnProperty(selectedOption)) {
+                    options3[selectedOption].forEach(function(option) {
+                        dropdown3.append('<option value="' + option + '">' + option + '</option>');
+                    });
+                    dropdown3.prop('disabled', false);
+                } else {
+                    dropdown3.prop('disabled', true);
+                }
+
+                // Reset and disable the fourth dropdown
+                $('#Year').empty().append('<option value="">Select an option</option>').prop('disabled', true);
+                $('#submitBtn').prop('disabled', true);
+            });
+
+            // Event handler for the third dropdown
+            $('#AssemblyConstituency').on('change', function() {
+                var selectedOption = $(this).val();
+                var dropdown4 = $('#Year');
+
+                // Clear previous options
+                dropdown4.empty().append('<option value="">Select an option</option>');
+
+                // Add options based on the selected option
+                if (options4.hasOwnProperty(selectedOption)) {
+                    options4[selectedOption].forEach(function(option) {
+                        dropdown4.append('<option value="' + option + '">' + option + '</option>');
+                    });
+                    dropdown4.prop('disabled', false);
+                } else {
+                    dropdown4.prop('disabled', true);
+                }
+
+                // Enable/disable the submit button
+                if (selectedOption) {
+                    $('#submitBtn').prop('disabled', false);
+                } else {
+                    $('#submitBtn').prop('disabled', true);
+                }
+            });
+
+            // Event handler for the submit button
+            $('#submitBtn').on('click', function() {
+                var state = $('#State').val();
+                var parliamentaryConstituency = $('#ParliamentaryConstituency').val();
+                var assemblyConstituency = $('#AssemblyConstituency').val();
+                var year = $('#Year').val();
+                // Generate the file name based on selected options
+                var fileName = state + '_' + parliamentaryConstituency + '_' + assemblyConstituency + '_' + year;
+
+                // Check if the file name exists in the fileNames object
+                if (fileNames.hasOwnProperty(fileName)) {
+                    var excelFileName = fileNames[fileName];
+                    var folderPath = '/Users/apple/Desktop/excel_files';
+
+                    // Retrieve the Excel file data and display it
+                    $.ajax({
+                        url: 'http://127.0.0.1:8000/home1/',
+                        type: 'GET',
+                        data: { folderPath: folderPath, fileName: excelFileName },
+                        success: function(data) {
+                            $('#dataContainer').html(data); // Display the data in the dataContainer div
+                        },
+                        error: function() {
+                            // Handle the error case
+                            $('#dataContainer').html('Error occurred while retrieving data.');
+                        }
+                    });
+                } else {
+                    $('#dataContainer').html('No data available for the selected options.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
